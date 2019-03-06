@@ -2,7 +2,7 @@ import argparse
 import pandas as pd
 import numpy as np
 import alpaca_trade_api as tradeapi
-
+import datetime
 
 class Quote():
     """
@@ -55,7 +55,7 @@ class Quote():
             self.prev_spread = round(self.prev_ask - self.prev_bid, 3)
             self.spread = round(self.ask - self.bid, 3)
             print(
-                'Level change:', self.prev_bid, self.prev_ask,
+                str(datetime.datetime.now()),'Level change:', self.prev_bid, self.prev_ask,
                 self.prev_spread, self.bid, self.ask, self.spread, flush=True
             )
             # If change is from one penny spread level to a different penny
@@ -73,11 +73,12 @@ class Position():
     sell as well as how many have been filled into our account.
     """
 
-    def __init__(self):
+    def __init__(self, symbol):
         self.orders_filled_amount = {}
         self.pending_buy_shares = 0
         self.pending_sell_shares = 0
         self.total_shares = 0
+        self.symbol = symbol
 
     def update_pending_buy_shares(self, quantity):
         self.pending_buy_shares += quantity
@@ -106,6 +107,10 @@ class Position():
 
     def update_total_shares(self, quantity):
         self.total_shares += quantity
+        print(str(datetime.datetime.now()) + " Total Shares of "+self.symbol +": "+str(self.total_shares));
+
+    def get_total_shares(self, quantity):
+        return self.total_shares;        
 
 
 def run(args):
@@ -127,7 +132,14 @@ def run(args):
     quote = Quote()
     qc = 'Q.%s' % symbol
     tc = 'T.%s' % symbol
-    position = Position()
+    position = Position(symbol)
+    
+    currPos = api.get_position(symbol);
+    
+    if(currPos is not None):
+        position.update_total_shares(int(currPos.__getattr__("qty")))
+        
+    #print(str(datetime.datetime.now()) + " Total Shares of "+symbol+" at startup "+str(position.total_shares));
 
     # Establish streaming connection
     conn = tradeapi.StreamConn(**opts)
@@ -151,6 +163,7 @@ def run(args):
             # The trade came too close to the quote update
             # and may have been for the previous level
             return
+        #print(str(datetime.datetime.now()) + " Data size "+str(data.size));
         if data.size >= 100:
             # The trade was large enough to follow, so we check to see if
             # we're ready to trade. We also check to see that the
@@ -166,6 +179,7 @@ def run(args):
             ):
                 # Everything looks right, so we submit our buy at the ask
                 try:
+                    print(str(datetime.datetime.now()) + ' Attempting Buy @ '+str(quote.ask));
                     o = api.submit_order(
                         symbol=symbol, qty='100', side='buy',
                         type='limit', time_in_force='day',
@@ -188,6 +202,7 @@ def run(args):
             ):
                 # Everything looks right, so we submit our sell at the bid
                 try:
+                    print(str(datetime.datetime.now()) + ' Attempting sell @ '+str(quote.bid));                
                     o = api.submit_order(
                         symbol=symbol, qty='100', side='sell',
                         type='limit', time_in_force='day',
