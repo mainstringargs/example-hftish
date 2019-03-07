@@ -132,12 +132,16 @@ def run(args):
     quote = Quote()
     qc = 'Q.%s' % symbol
     tc = 'T.%s' % symbol
+    
     position = Position(symbol)
     
-    currPos = api.get_position(symbol);
-    
-    if(currPos is not None):
-        position.update_total_shares(int(currPos.__getattr__("qty")))
+    try:
+        currPos = api.get_position(symbol);
+        
+        if(currPos is not None):
+            position.update_total_shares(int(currPos.__getattr__("qty")))
+    except:
+        print("No current position in "+symbol);
         
     #print(str(datetime.datetime.now()) + " Total Shares of "+symbol+" at startup "+str(position.total_shares));
 
