@@ -159,6 +159,7 @@ def initialize(context):
     opts['secret_key'] = os.environ['APCA_API_SECRET_KEY']
     opts['base_url'] = os.environ['APCA_API_BASE_URL']
 
+    global api
     api = tradeapi.REST(**opts)
     #run()
     schedule_functions()
@@ -176,7 +177,8 @@ def run():
     tc = 'T.%s' % symbol
     
     position = Position(symbol)
-    
+    global api
+        
     try:
         currPos = api.get_position(symbol);
         
@@ -185,7 +187,7 @@ def run():
     except:
         print("No current position in "+symbol);
         
-    #print(str(datetime.datetime.now()) + " Total Shares of "+symbol+" at startup "+str(position.total_shares));
+    print(str(datetime.datetime.now()) + " account value at run $"+api.get_account().__getattr__("portfolio_value"));
 
     opts = {}
     opts['key_id'] = os.environ['APCA_API_KEY_ID']
@@ -302,6 +304,7 @@ def run():
     )
 
 def cancel_open_orders(context, data):
+    global api
     print(str(datetime.datetime.now()) + " Canceling all open orders");
 
     open_orders = api.list_orders(
@@ -313,6 +316,7 @@ def cancel_open_orders(context, data):
         
             
 def liquidate(context, data):
+    global api
     print(str(datetime.datetime.now()) + " Liquidating account");
     
         # Get a list of all of our positions.
