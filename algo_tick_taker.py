@@ -175,7 +175,7 @@ def initialize(context):
     global max_shares
     symbol = "TQQQ"
     max_shares = 500
-
+    shouldLiquidate = True;
       
     opts = {}
     opts['key_id'] = os.environ['APCA_API_KEY_ID']
@@ -227,16 +227,18 @@ def initialize(context):
             minutes=7),calendars.US_EQUITIES)
             
     print(str(datetime.datetime.now()) + " cancel_open_orders Scheduled");
+                
             
-    schedule_function(
-        liquidate,
-        date_rules.every_day(),
-        time_rules.market_close(
-            hours=0,
-            minutes=5),calendars.US_EQUITIES)     
-            
-    print(str(datetime.datetime.now()) + " liquidate Scheduled");
-            
+    if(shouldLiquidate is True):
+        print(str(datetime.datetime.now()) + " liquidate Scheduled");
+        
+        schedule_function(
+            liquidate,
+            date_rules.every_day(),
+            time_rules.market_close(
+                hours=0,
+                minutes=5),calendars.US_EQUITIES) 
+                
     schedule_function(
         end_of_day_dump,
         date_rules.every_day(),
