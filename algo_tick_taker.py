@@ -205,7 +205,7 @@ def initialize(context):
         date_rules.every_day(),
         time_rules.market_close(
             hours=0,
-            minutes=15),calendars.US_EQUITIES)      
+            minutes=11),calendars.US_EQUITIES)      
 
     print(str(datetime.datetime.now()) + " cancel_open_buy_orders Scheduled");            
 
@@ -214,7 +214,7 @@ def initialize(context):
         date_rules.every_day(),
         time_rules.market_close(
             hours=0,
-            minutes=20),calendars.US_EQUITIES)         
+            minutes=12),calendars.US_EQUITIES)         
 
 
     print(str(datetime.datetime.now()) + " stop_buying Scheduled");            
@@ -237,7 +237,7 @@ def initialize(context):
             date_rules.every_day(),
             time_rules.market_close(
                 hours=0,
-                minutes=5),calendars.US_EQUITIES) 
+                minutes=3),calendars.US_EQUITIES) 
                 
     schedule_function(
         end_of_day_dump,
@@ -250,7 +250,7 @@ def initialize(context):
         start_stream,
         date_rules.every_day(),
         time_rules.market_open(
-            minutes=5),calendars.US_EQUITIES)
+            minutes=3),calendars.US_EQUITIES)
     
     print(str(datetime.datetime.now()) + " start_stream Scheduled");
     
@@ -448,7 +448,7 @@ def cancel_open_buy_orders(context, data):
     )
     
     for oo in open_orders:
-        if 0 < oo.amount:  # it is a buy order
+        if "buy"==oo.side:  # it is a buy order
             api.cancel_order(oo.__getattr__("id"));                
             
 def liquidate(context, data):
